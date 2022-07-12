@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>login page</title>
+</head>
+<body>
+<h1>login</h1>
+<h2>{{ note }}</h2>
+ {% if session.name %}
+      You are logged in {{ session.name }} <a href="/logout">logout</a>.
+   {% else %}
+      You are not logged in.
+   {% endif %}
+<form action="/login" method="post">
+  <div>
+        <label>Enter your username:</label>
+        <input type="text" name="username">
+  </div><br>
+  <div>
+        <label>password:</label>
+        <input type="password" name="password">
+  </div><br>
+        <button type="submit">login</button>
+
+</form>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Chat App</title>
+    <style>
+        #message_input_form
+        {
+        border :1px solid black;
+        height:500px;
+        width:500px;
+        }
+        button,input
+        {
+        margin-top:20px;
+        margin-left:50px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+    
+    const socket = io.connect();
+
+   
+   function broadcastingf(){
+            console.log("inside broadcast")
+            var broadmsg = document.getElementById('message_input').value;
+            console.log("broadcasting message: "+broadmsg);
+            socket.emit('broadcasting',broadmsg);
+            console.log("broadcasted")
+            document.getElementById("message_input").value=""
+        }
+
+        socket.on('rb',function(msg){
+            console.log("inside r_broadcast "+msg);
+            const newNode = document.createElement('div');
+
+            newNode.innerHTML = `${msg}`;
+            document.getElementById('messages').appendChild(newNode);
+
+        })
+
+
+    socket.on('connect', function () {
+        socket.emit('join_room', {
+            username: "{{username}}",
+            room: "{{ room }}"
+
+
+        }
+       
+            )
+        
+        let message_input = document.getElementById('message_input');
+
+        document.getElementById('message_input_form').onsubmit = function (e) {
+            e.preventDefault();
+            let message = message_input.value.trim();
+            if (message.length) {
+                socket.emit('send_message', {
+                    username: "{{username}}",
+                    room: "{{ room }}",
+                    message: message
+                })
+            }
+            message_input.value = '';
+            message_input.focus();
+        }
+      });
+
+      socket.on('receive_message', function (data) {
+        console.log(data);
+        const newNode = document.createElement('div');
+        newNode.innerHTML = `<b>${data.username}:&nbsp;</b> ${data.message}`;
+        document.getElementById('messages').appendChild(newNode);
+    });
+
+      socket.on('join_room_announcement', function (data) {
+        console.log(data);
+        const newNode = document.createElement('div');
+        newNode.innerHTML = `<b>${data.username}</b> has joined the room`;
+        document.getElementById('messages').appendChild(newNode);
+        socket.emit("prev_room_chat",{"room":"{{ room }}"})
+      });
+        socket.on('leave_room_announcement', function (data) {
+        console.log(data);
+        const newNode = document.createElement('div');
+        newNode.innerHTML = `<b>${data.username}</b> has left the room`;
+        document.getElementById('messages').appendChild(newNode);
+    });
+socket.on('set_room_chat',function(data){
+        console.log("inside set_room_chat with : "+ data)
+        const newNode = document.createElement('div');
+        newNode.innerHTML = `${data}`;
+        document.getElementById('messages').appendChild(newNode);
+        console.log('at end of set_room_chat')
+    })
+
+
+</script>
+</head>
+<body>
+<h1>Welcome to chat room {{ room }} {{ username}}</h1>
+
+<div id="messages"></div>
+
+<form id="message_input_form">
+    <input type="text" id="message_input" placeholder="Enter your message here"><br>
+    
+
+    <br><br>
+    
+    <button >Send</button>
+
+</form>
+
+
+<button id="broadcast" value="broadcast" onclick="broadcastingf()" >Broadcast</button>
+
+<form action="/login">
+<input type="submit" name="leave_room" value=":leave room">
+</form>
+<button><a href="logout">Logout</a></button>
+
+
+
+</body>
+
+
+</html>
